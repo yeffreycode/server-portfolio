@@ -9,7 +9,7 @@ app.use(express.json());
 app.use(urlencoded({ extended: true }));
 app.use(cors({ origin: config.origin }));
 
-const generateMessage = (msg: { txt: string; name: string }) => {
+const generateMessage = (msg: { content: string; name: string; email: string }) => {
   let date = new Date(Date.now());
   let params = {
     username: "new portfolio message",
@@ -25,9 +25,14 @@ const generateMessage = (msg: { txt: string; name: string }) => {
         fields: [
           {
             name: "content",
-            value: msg.txt,
+            value: msg.content,
             inline: false,
           },
+	  {
+		name: 'email',
+		value: msg.email,
+		inline: false,
+	  },
           {
             name: "date",
             value: date.toLocaleDateString() + "  " + date.getHours() + ":" + date.getMinutes(),
@@ -41,7 +46,7 @@ const generateMessage = (msg: { txt: string; name: string }) => {
 };
 
 app.post("/", async (req, res, next) => {
-  let message = { name: req.body.name, txt: req.body.txt };
+  let message = { name: req.body.name, content: req.body.content, email: req.body.email };
   let msg = generateMessage(message);
   let response = await axios.post(config.WEBHOOK_URL, JSON.stringify(msg), { headers: { "Content-Type": "application/json" } });
   return res.status(200).json(response.status);
